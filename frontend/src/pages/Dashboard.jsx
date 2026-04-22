@@ -16,6 +16,15 @@ export const Dashboard = () => {
 
   const [recentStudents, setRecentStudents] = React.useState([]);
 
+  const renderStatusLabel = (status) => {
+    const normalized = String(status || '').toLowerCase();
+    if (normalized === 'active') return t.studentsPage.active;
+    if (normalized === 'inactive') return t.studentsPage.inactive;
+    if (normalized === 'graduated') return t.studentsPage.graduated;
+    if (normalized === 'suspended') return t.studentsPage.suspended;
+    return status;
+  };
+
   React.useEffect(() => {
     const fetchDashboardData = async () => {
       try {
@@ -109,7 +118,9 @@ export const Dashboard = () => {
                         <strong>{student.first_name} {student.last_name}</strong>
                         <p>{student.student_code} • {student.email}</p>
                       </div>
-                      <span className={`status ${student.status.toLowerCase()}`}>{renderStatusLabel(student.status)}</span>
+                      <span className={`status ${String(student.status || '').toLowerCase()}`}>
+                        {renderStatusLabel(student.status)}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -141,11 +152,3 @@ export const Dashboard = () => {
 };
 
 export default Dashboard;
-  const renderStatusLabel = (status) => {
-    const normalized = String(status || '').toLowerCase();
-    if (normalized === 'active') return t.studentsPage.active;
-    if (normalized === 'inactive') return t.studentsPage.inactive;
-    if (normalized === 'graduated') return t.studentsPage.graduated;
-    if (normalized === 'suspended') return t.studentsPage.suspended;
-    return status;
-  };

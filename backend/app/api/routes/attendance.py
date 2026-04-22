@@ -16,6 +16,7 @@ from ..deps import get_current_user, get_teacher_user
 router = APIRouter(prefix="/attendance", tags=["Attendance"])
 
 
+@router.get("", response_model=List[AttendanceResponse])
 @router.get("/", response_model=List[AttendanceResponse])
 async def get_attendance(
     skip: int = Query(0, ge=0),
@@ -39,6 +40,7 @@ async def get_attendance_record(
     return attendance
 
 
+@router.post("", response_model=AttendanceResponse, status_code=status.HTTP_201_CREATED)
 @router.post("/", response_model=AttendanceResponse, status_code=status.HTTP_201_CREATED)
 async def create_attendance(
     attendance_data: AttendanceCreate,

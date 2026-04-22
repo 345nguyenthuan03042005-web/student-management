@@ -17,6 +17,7 @@ from ..deps import get_current_user, get_teacher_user
 router = APIRouter(prefix="/classes", tags=["Classes"])
 
 
+@router.get("", response_model=List[ClassResponse])
 @router.get("/", response_model=List[ClassResponse])
 async def get_classes(
     skip: int = Query(0, ge=0),
@@ -47,6 +48,7 @@ async def get_class(
     return class_details
 
 
+@router.post("", response_model=ClassResponse, status_code=status.HTTP_201_CREATED)
 @router.post("/", response_model=ClassResponse, status_code=status.HTTP_201_CREATED)
 async def create_class(
     class_data: ClassCreate,

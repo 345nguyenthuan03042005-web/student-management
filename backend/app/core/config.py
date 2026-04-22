@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
     # Database
-    DATABASE_URL: str = "mysql+pymysql://root:123456@localhost/student_management"
+    DATABASE_URL: str = "mysql+pymysql://root:123456@localhost/quan_ly_sinh_vien"
 
     # JWT
     SECRET_KEY: str = "secret-key-change-in-production"

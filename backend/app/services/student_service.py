@@ -177,26 +177,9 @@ class ScoreService:
         if not enrollment:
             return None, "Enrollment not found"
 
-        score_data_dict = score_data.model_dump()
-        score_value = float(score_data_dict["score"])
-        max_score = float(score_data_dict.get("max_score", 10.0))
-        score_data_dict["grade"] = ScoreService._calculate_grade(score_value, max_score)
-
-        score = ScoreCRUD.create_score(db, ScoreCreate(**score_data_dict))
+        # Grade is computed from score/max_score in the Vietnamese schema mapping.
+        score = ScoreCRUD.create_score(db, score_data)
         return score, None
-
-    @staticmethod
-    def _calculate_grade(score: float, max_score: float) -> str:
-        normalized = (score / max_score) * 10 if max_score else 0
-        if normalized >= 8.5:
-            return "A"
-        if normalized >= 7.0:
-            return "B"
-        if normalized >= 5.5:
-            return "C"
-        if normalized >= 4.0:
-            return "D"
-        return "F"
 
 
 class AuthService:
@@ -224,11 +207,6 @@ class AuthService:
             data={"sub": user.username, "role": user.role},
             expires_delta=timedelta(minutes=30),
         )
-
-        user.last_login_at = datetime.utcnow()
-        db.add(user)
-        db.commit()
-        db.refresh(user)
         user_response = UserResponse.model_validate(user)
         token = Token(access_token=access_token, user=user_response)
         return token, None

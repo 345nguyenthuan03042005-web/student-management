@@ -17,6 +17,7 @@ from ..deps import get_current_user, get_teacher_user
 router = APIRouter(prefix="/scores", tags=["Scores"])
 
 
+@router.get("", response_model=List[ScoreResponse])
 @router.get("/", response_model=List[ScoreResponse])
 async def get_scores(
     skip: int = Query(0, ge=0),
@@ -72,6 +73,7 @@ async def get_score(
     return score
 
 
+@router.post("", response_model=ScoreResponse, status_code=status.HTTP_201_CREATED)
 @router.post("/", response_model=ScoreResponse, status_code=status.HTTP_201_CREATED)
 async def create_score(
     score_data: ScoreCreate,

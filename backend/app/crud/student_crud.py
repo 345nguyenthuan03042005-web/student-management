@@ -100,7 +100,10 @@ class ClassCRUD:
 
     @staticmethod
     def create_class(db: Session, class_obj: ClassCreate) -> Class:
-        db_class = Class(**class_obj.model_dump())
+        payload = class_obj.model_dump()
+        # Vietnamese schema `lop_hoc` has no `description` column.
+        payload.pop("description", None)
+        db_class = Class(**payload)
         db.add(db_class)
         db.commit()
         db.refresh(db_class)
@@ -109,6 +112,7 @@ class ClassCRUD:
     @staticmethod
     def update_class(db: Session, db_class: Class, class_obj: ClassUpdate) -> Class:
         update_data = class_obj.model_dump(exclude_unset=True)
+        update_data.pop("description", None)
         for field, value in update_data.items():
             setattr(db_class, field, value)
         db.add(db_class)
@@ -141,7 +145,10 @@ class SubjectCRUD:
 
     @staticmethod
     def create_subject(db: Session, subject: SubjectCreate) -> Subject:
-        db_subject = Subject(**subject.model_dump())
+        payload = subject.model_dump()
+        # Vietnamese schema `mon_hoc` has no `is_active` column.
+        payload.pop("is_active", None)
+        db_subject = Subject(**payload)
         db.add(db_subject)
         db.commit()
         db.refresh(db_subject)
@@ -150,6 +157,7 @@ class SubjectCRUD:
     @staticmethod
     def update_subject(db: Session, db_subject: Subject, subject: SubjectUpdate) -> Subject:
         update_data = subject.model_dump(exclude_unset=True)
+        update_data.pop("is_active", None)
         for field, value in update_data.items():
             setattr(db_subject, field, value)
         db.add(db_subject)
@@ -225,7 +233,10 @@ class ClassScheduleCRUD:
 
     @staticmethod
     def create_schedule(db: Session, schedule: ClassScheduleCreate) -> ClassSchedule:
-        db_schedule = ClassSchedule(**schedule.model_dump())
+        payload = schedule.model_dump()
+        # Vietnamese schema `lich_hoc` doesn't store `is_active` (always treated as active).
+        payload.pop("is_active", None)
+        db_schedule = ClassSchedule(**payload)
         db.add(db_schedule)
         db.commit()
         db.refresh(db_schedule)
@@ -234,6 +245,7 @@ class ClassScheduleCRUD:
     @staticmethod
     def update_schedule(db: Session, db_schedule: ClassSchedule, schedule: ClassScheduleUpdate) -> ClassSchedule:
         update_data = schedule.model_dump(exclude_unset=True)
+        update_data.pop("is_active", None)
         for field, value in update_data.items():
             setattr(db_schedule, field, value)
         db.add(db_schedule)
@@ -327,7 +339,10 @@ class ScoreCRUD:
 
     @staticmethod
     def create_score(db: Session, score: ScoreCreate) -> Score:
-        db_score = Score(**score.model_dump())
+        payload = score.model_dump()
+        # `grade` is a computed property in the Vietnamese schema mapping.
+        payload.pop("grade", None)
+        db_score = Score(**payload)
         db.add(db_score)
         db.commit()
         db.refresh(db_score)
@@ -336,6 +351,7 @@ class ScoreCRUD:
     @staticmethod
     def update_score(db: Session, db_score: Score, score: ScoreUpdate) -> Score:
         update_data = score.model_dump(exclude_unset=True)
+        update_data.pop("grade", None)
         for field, value in update_data.items():
             setattr(db_score, field, value)
         db.add(db_score)
