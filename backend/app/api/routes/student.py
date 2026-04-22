@@ -16,6 +16,7 @@ from ..deps import get_current_user, get_teacher_user
 router = APIRouter(prefix="/students", tags=["Students"])
 
 
+@router.get("", response_model=List[StudentResponse])
 @router.get("/", response_model=List[StudentResponse])
 async def get_students(
     skip: int = Query(0, ge=0),
@@ -52,6 +53,7 @@ async def get_student(
     return student_details
 
 
+@router.post("", response_model=StudentResponse, status_code=status.HTTP_201_CREATED)
 @router.post("/", response_model=StudentResponse, status_code=status.HTTP_201_CREATED)
 async def create_student(
     student_data: StudentCreate,

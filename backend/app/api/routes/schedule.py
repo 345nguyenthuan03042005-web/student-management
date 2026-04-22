@@ -20,6 +20,7 @@ from ..deps import get_current_user, get_teacher_user
 router = APIRouter(prefix="/schedule", tags=["Schedule"])
 
 
+@router.get("", response_model=List[ClassScheduleResponse])
 @router.get("/", response_model=List[ClassScheduleResponse])
 async def get_schedules(
     skip: int = Query(0, ge=0),
@@ -43,6 +44,7 @@ async def get_schedule(
     return schedule
 
 
+@router.post("", response_model=ClassScheduleResponse, status_code=status.HTTP_201_CREATED)
 @router.post("/", response_model=ClassScheduleResponse, status_code=status.HTTP_201_CREATED)
 async def create_schedule(
     schedule_data: ClassScheduleCreate,
