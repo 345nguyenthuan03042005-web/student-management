@@ -29,6 +29,13 @@ const IMPORT_HEADER_ALIASES = {
   address: 'address',
   diachi: 'address',
   dia_chi: 'address',
+  guardian_name: 'guardian_name',
+  tennguoigiamho: 'guardian_name',
+  ten_nguoi_giam_ho: 'guardian_name',
+  guardian_phone: 'guardian_phone',
+  sodienthoainguoigiamho: 'guardian_phone',
+  so_dien_thoai_nguoi_giam_ho: 'guardian_phone',
+  so_dien_thoai_giam_ho: 'guardian_phone',
   class_id: 'class_id',
   malop: 'class_id',
   ma_lop: 'class_id',
@@ -46,7 +53,7 @@ export const StudentPage = () => {
   const { user } = useAuth();
   const pageCopy = t.studentsPage;
   const commonCopy = t.common;
-  const detailsLabel = language === 'vi' ? 'Chi tiết' : 'Details';
+  const detailsLabel = commonCopy.details;
   const [students, setStudents] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
   const [showForm, setShowForm] = React.useState(false);
@@ -56,6 +63,7 @@ export const StudentPage = () => {
   const [importText, setImportText] = React.useState('');
   const [importResult, setImportResult] = React.useState(null);
   const [selectedImportFile, setSelectedImportFile] = React.useState(null);
+  const [selectedStudentIds, setSelectedStudentIds] = React.useState([]);
 
   const canManage = user?.role === 'admin' || user?.role === 'teacher';
 
@@ -64,6 +72,7 @@ export const StudentPage = () => {
     try {
       const response = await StudentService.getStudents();
       setStudents(response.data);
+      setSelectedStudentIds([]);
     } catch (error) {
       console.error('Failed to fetch students:', error);
     } finally {
@@ -119,10 +128,75 @@ export const StudentPage = () => {
     if (window.confirm(pageCopy.confirmDelete)) {
       try {
         await StudentService.deleteStudent(id);
+        setSelectedStudentIds((prev) => prev.filter((studentId) => studentId !== id));
         await fetchStudents();
       } catch (error) {
         console.error('Failed to delete student:', error);
       }
+    }
+  };
+
+  const filteredStudents = students.filter((student) =>
+    `${student.first_name} ${student.last_name} ${student.email} ${student.student_code}`
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+  );
+
+  const filteredStudentIds = filteredStudents.map((student) => student.id);
+  const selectedFilteredCount = filteredStudentIds.filter((studentId) =>
+    selectedStudentIds.includes(studentId)
+  ).length;
+  const allFilteredSelected = filteredStudents.length > 0 && selectedFilteredCount === filteredStudents.length;
+
+  const toggleStudentSelection = (studentId) => {
+    setSelectedStudentIds((prev) =>
+      prev.includes(studentId) ? prev.filter((id) => id !== studentId) : [...prev, studentId]
+    );
+  };
+
+  const toggleSelectAllFiltered = () => {
+    setSelectedStudentIds((prev) => {
+      if (allFilteredSelected) {
+        return prev.filter((id) => !filteredStudentIds.includes(id));
+      }
+
+      return Array.from(new Set([...prev, ...filteredStudentIds]));
+    });
+  };
+
+  const handleBulkDeleteStudents = async () => {
+    if (!canManage) {
+      window.alert(commonCopy.roleRestricted);
+      return;
+    }
+
+    if (selectedStudentIds.length === 0) {
+      window.alert(pageCopy.bulkDeleteEmpty);
+      return;
+    }
+
+    const confirmed = window.confirm(
+      pageCopy.confirmBulkDelete.replace('{count}', String(selectedStudentIds.length))
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await StudentService.deleteStudentsBulk(selectedStudentIds);
+      const result = response.data;
+      setSelectedStudentIds([]);
+      await fetchStudents();
+
+      if (Array.isArray(result.missing_ids) && result.missing_ids.length > 0) {
+        window.alert(pageCopy.bulkDeletePartial.replace('{count}', String(result.deleted_count)));
+      }
+    } catch (error) {
+      console.error('Failed to delete selected students:', error);
+      window.alert(error.response?.data?.detail || 'Bulk delete failed');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -132,6 +206,7 @@ export const StudentPage = () => {
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
       .replace(/[^a-z0-9]+/g, '_')
       .replace(/^_+|_+$/g, '');
 
@@ -152,6 +227,27 @@ export const StudentPage = () => {
     return 'Active';
   };
 
+  const normalizeDate = (value) => {
+    const raw = String(value ?? '').trim();
+    if (!raw) return null;
+
+    // Already ISO format (yyyy-mm-dd or yyyy/mm/dd).
+    if (/^\d{4}[-/]\d{1,2}[-/]\d{1,2}$/.test(raw)) {
+      const [y, m, d] = raw.split(/[-/]/).map((part) => part.padStart(2, '0'));
+      return `${y}-${m}-${d}`;
+    }
+
+    // Common Excel export in VN: dd/mm/yyyy or dd-mm-yyyy.
+    if (/^\d{1,2}[-/]\d{1,2}[-/]\d{4}$/.test(raw)) {
+      const [d, m, y] = raw.split(/[-/]/).map((part) => part.padStart(2, '0'));
+      return `${y}-${m}-${d}`;
+    }
+
+    const parsed = new Date(raw);
+    if (Number.isNaN(parsed.getTime())) return null;
+    return parsed.toISOString().split('T')[0];
+  };
+
   const parseSpreadsheetText = (rawText) => {
     const rows = rawText
       .split(/\r?\n/)
@@ -168,13 +264,15 @@ export const StudentPage = () => {
     const dataRows = hasHeader ? parsedRows.slice(1) : parsedRows;
     const fallbackHeaders = [
       'student_code',
-      'first_name',
       'last_name',
+      'first_name',
       'email',
       'phone',
       'date_of_birth',
       'gender',
       'address',
+      'guardian_name',
+      'guardian_phone',
       'class_id',
       'enrollment_date',
       'status'
@@ -196,11 +294,13 @@ export const StudentPage = () => {
           last_name: record.last_name || '',
           email: record.email || '',
           phone: record.phone || null,
-          date_of_birth: record.date_of_birth || null,
+          date_of_birth: normalizeDate(record.date_of_birth),
           gender: normalizeGender(record.gender),
           address: record.address || null,
+          guardian_name: record.guardian_name || null,
+          guardian_phone: record.guardian_phone || null,
           class_id: Number(record.class_id),
-          enrollment_date: record.enrollment_date || new Date().toISOString().split('T')[0],
+          enrollment_date: normalizeDate(record.enrollment_date) || new Date().toISOString().split('T')[0],
           status: normalizeStatus(record.status)
         };
       })
@@ -210,7 +310,8 @@ export const StudentPage = () => {
           row.first_name &&
           row.last_name &&
           row.email &&
-          Number.isFinite(row.class_id)
+          Number.isFinite(row.class_id) &&
+          row.class_id > 0
       );
   };
 
@@ -220,13 +321,13 @@ export const StudentPage = () => {
       return;
     }
     if (!importText.trim()) {
-      window.alert('Vui lòng dán dữ liệu Excel trước khi import.');
+      window.alert(pageCopy.importPasteRequired);
       return;
     }
 
     const parsedStudents = parseSpreadsheetText(importText);
     if (parsedStudents.length === 0) {
-      window.alert('Không đọc được dữ liệu. Hãy kiểm tra lại cột hoặc định dạng.');
+      window.alert(pageCopy.importParseFailed);
       return;
     }
 
@@ -263,7 +364,7 @@ export const StudentPage = () => {
       setImportResult(null);
     } catch (error) {
       console.error('Failed to read import file:', error);
-      window.alert('Không đọc được file. Hãy thử lưu lại từ Excel dưới dạng CSV UTF-8 rồi tải lên lại.');
+      window.alert(pageCopy.importFileReadFailed);
     }
   };
 
@@ -281,12 +382,6 @@ export const StudentPage = () => {
       }))
     );
   };
-
-  const filteredStudents = students.filter((student) =>
-    `${student.first_name} ${student.last_name} ${student.email} ${student.student_code}`
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase())
-  );
 
   const renderStatusLabel = (status) => {
     const normalized = status.toLowerCase();
@@ -306,7 +401,7 @@ export const StudentPage = () => {
           <section className="content-hero">
             <div>
               <h1>{pageCopy.title}</h1>
-              <p>Tra cứu, cập nhật hồ sơ và nhập dữ liệu sinh viên theo lô từ một màn hình thống nhất.</p>
+              <p>{pageCopy.description}</p>
             </div>
             <div className="content-hero-actions">
               <button type="button" className="btn-primary btn-secondary-tone" onClick={handleExportCsv}>
@@ -357,12 +452,11 @@ export const StudentPage = () => {
                 <p>{pageCopy.importDescription}</p>
               </div>
               <div className="import-helper">
-                <strong>Thứ tự cột hỗ trợ:</strong> mã_sinh_viên | tên | họ | email | số_điện_thoại | ngày_sinh |
-                giới_tính | địa_chỉ | mã_lớp | ngày_nhập_học | trạng_thái
+                <strong>{pageCopy.importColumnsHelpLabel}</strong> {pageCopy.importColumnsHelp}
               </div>
               <div className="import-upload">
                 <label className="import-upload-label" htmlFor="student-import-file">
-                  Chọn file
+                  {pageCopy.importChooseFile}
                 </label>
                 <input
                   id="student-import-file"
@@ -373,9 +467,13 @@ export const StudentPage = () => {
                   disabled={loading}
                 />
                 <div className="import-upload-copy">
-                  <strong>Hoặc tải file từ Excel</strong>
-                  <span>Hỗ trợ file .csv, .tsv hoặc .txt xuất từ Excel.</span>
-                  {selectedImportFile && <span className="import-selected-file">Đã chọn file: {selectedImportFile}</span>}
+                  <strong>{pageCopy.importOrUploadTitle}</strong>
+                  <span>{pageCopy.importSupportTypes}</span>
+                  {selectedImportFile && (
+                    <span className="import-selected-file">
+                      {pageCopy.importSelectedFile} {selectedImportFile}
+                    </span>
+                  )}
                 </div>
               </div>
               <textarea
@@ -387,22 +485,22 @@ export const StudentPage = () => {
               />
               <div className="form-actions import-actions">
                 <button type="button" className="btn-submit" onClick={handleImportStudents} disabled={loading}>
-                  {loading ? commonCopy.loading : 'Import dữ liệu'}
+                  {loading ? commonCopy.loading : pageCopy.importAction}
                 </button>
               </div>
               {importResult && (
                 <div className="import-result">
                   <p>
-                    <strong>Đã tạo:</strong> {importResult.created_count || 0}
+                    <strong>{pageCopy.importCreatedLabel}</strong> {importResult.created_count || 0}
                   </p>
                   <p>
-                    <strong>Lỗi:</strong> {importResult.error_count || 0}
+                    <strong>{pageCopy.importErrorsLabel}</strong> {importResult.error_count || 0}
                   </p>
                   {Array.isArray(importResult.errors) && importResult.errors.length > 0 && (
                     <div className="import-errors">
                       {importResult.errors.map((item, index) => (
                         <div key={`${item.row}-${index}`} className="import-error-item">
-                          Dòng {item.row}: {item.student_code ? `${item.student_code} - ` : ''}
+                          {pageCopy.importRowLabel} {item.row}: {item.student_code ? `${item.student_code} - ` : ''}
                           {item.error}
                         </div>
                       ))}
@@ -421,6 +519,21 @@ export const StudentPage = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input"
             />
+            {canManage && (
+              <div className="bulk-actions">
+                <span className="bulk-selection-copy">
+                  {pageCopy.selectedCount.replace('{count}', String(selectedStudentIds.length))}
+                </span>
+                <button
+                  type="button"
+                  className="btn-small btn-danger"
+                  onClick={handleBulkDeleteStudents}
+                  disabled={loading || selectedStudentIds.length === 0}
+                >
+                  {pageCopy.bulkDelete}
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="students-table-section">
@@ -432,6 +545,16 @@ export const StudentPage = () => {
               <table className="students-table">
                 <thead>
                   <tr>
+                    {canManage && (
+                      <th className="selection-column">
+                        <input
+                          type="checkbox"
+                          checked={allFilteredSelected}
+                          onChange={toggleSelectAllFiltered}
+                          aria-label={pageCopy.selectAll}
+                        />
+                      </th>
+                    )}
                     <th>{pageCopy.studentId}</th>
                     <th>{pageCopy.name}</th>
                     <th>{pageCopy.email}</th>
@@ -444,8 +567,18 @@ export const StudentPage = () => {
                 <tbody>
                   {filteredStudents.map((student) => (
                     <tr key={student.id}>
+                      {canManage && (
+                        <td className="selection-column">
+                          <input
+                            type="checkbox"
+                            checked={selectedStudentIds.includes(student.id)}
+                            onChange={() => toggleStudentSelection(student.id)}
+                            aria-label={`${pageCopy.selectStudent} ${student.student_code}`}
+                          />
+                        </td>
+                      )}
                       <td>{student.student_code}</td>
-                      <td>{student.first_name} {student.last_name}</td>
+                      <td>{student.last_name} {student.first_name}</td>
                       <td>{student.email}</td>
                       <td>{student.phone || '-'}</td>
                       <td>{student.class_id}</td>
@@ -470,7 +603,7 @@ export const StudentPage = () => {
                             </button>
                           </>
                         ) : (
-                          <span className="muted-text">Chỉ xem</span>
+                          <span className="muted-text">{commonCopy.viewOnly}</span>
                         )}
                       </td>
                     </tr>

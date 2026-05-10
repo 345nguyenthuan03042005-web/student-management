@@ -5,10 +5,23 @@ Initializes the FastAPI app, includes all routes, and configures CORS.
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from .core.config import settings
 from .db.base import Base
 from .db.database import engine
-from .api.routes import attendance, auth, class_route, enrollment, schedule, score, student, subject
+from .api.routes import (
+    attendance,
+    auth,
+    class_route,
+    enrollment,
+    room,
+    teacher,
+    term,
+    schedule,
+    score,
+    student,
+    subject,
+)
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -24,10 +37,21 @@ app = FastAPI(
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify allowed origins
+    allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
+)
+
+# Add security headers
+app.add_middleware(
+    lambda app: CORSMiddleware(
+        app,
+        allow_origins=settings.ALLOWED_ORIGINS,
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "PUT", "DELETE"],
+        allow_headers=["*"],
+    ),
 )
 
 # Include routes
@@ -61,6 +85,18 @@ app.include_router(
 )
 app.include_router(
     attendance.router,
+    prefix=settings.API_V1_STR,
+)
+app.include_router(
+    teacher.router,
+    prefix=settings.API_V1_STR,
+)
+app.include_router(
+    term.router,
+    prefix=settings.API_V1_STR,
+)
+app.include_router(
+    room.router,
     prefix=settings.API_V1_STR,
 )
 

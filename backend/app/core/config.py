@@ -13,17 +13,25 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
     # Database
-    DATABASE_URL: str = "mysql+pymysql://root:123456@localhost/quan_ly_sinh_vien"
+    DATABASE_URL: str = "mysql+pymysql://root:password@localhost:3306/qlsv"
 
     # JWT
-    SECRET_KEY: str = "secret-key-change-in-production"
+    SECRET_KEY: str = "your-secret-key-change-in-production-min-32-chars"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
     # App
     APP_NAME: str = "Student Management System"
-    DEBUG: bool = True
+    DEBUG: bool = False
     API_V1_STR: str = "/api/v1"
+    
+    # CORS - specify allowed origins in production
+    ALLOWED_ORIGINS: list = [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:5173",
+    ]
 
     model_config = SettingsConfigDict(
         env_file=Path(__file__).resolve().parents[2] / ".env",

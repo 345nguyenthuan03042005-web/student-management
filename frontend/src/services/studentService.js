@@ -25,6 +25,12 @@ class StudentService {
     return apiClient.delete(`/students/${studentId}`);
   }
 
+  static deleteStudentsBulk(studentIds) {
+    return apiClient.post('/students/bulk-delete', {
+      student_ids: studentIds
+    });
+  }
+
   static getStudentsByClass(classId, params = {}) {
     return apiClient.get('/students', {
       params: { ...params, class_id: classId }
@@ -142,6 +148,50 @@ class AttendanceService {
   }
 }
 
+class AcademicTermService {
+  static getTerms(params = {}) {
+    return apiClient.get('/terms', { params });
+  }
+
+  static getTerm(termId) {
+    return apiClient.get(`/terms/${termId}`);
+  }
+
+  static createTerm(termData) {
+    return apiClient.post('/terms', termData);
+  }
+
+  static updateTerm(termId, termData) {
+    return apiClient.put(`/terms/${termId}`, termData);
+  }
+
+  static deleteTerm(termId) {
+    return apiClient.delete(`/terms/${termId}`);
+  }
+}
+
+class RoomService {
+  static getRooms(params = {}) {
+    return apiClient.get('/rooms', { params });
+  }
+
+  static getRoom(roomId) {
+    return apiClient.get(`/rooms/${roomId}`);
+  }
+
+  static createRoom(roomData) {
+    return apiClient.post('/rooms', roomData);
+  }
+
+  static updateRoom(roomId, roomData) {
+    return apiClient.put(`/rooms/${roomId}`, roomData);
+  }
+
+  static deleteRoom(roomId) {
+    return apiClient.delete(`/rooms/${roomId}`);
+  }
+}
+
 class ScoreService {
   static getScores(params = {}) {
     return apiClient.get('/scores', { params });
@@ -193,10 +243,12 @@ class AuthService {
 }
 
 export {
+  AcademicTermService,
   AttendanceService,
   AuthService,
   ClassService,
   EnrollmentService,
+  RoomService,
   ScheduleService,
   ScoreService,
   StudentService,

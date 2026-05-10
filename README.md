@@ -103,7 +103,7 @@ App (Root)
 ## 📚 Core Features
 
 ### Authentication & Authorization
-- ✅ User registration and login
+- ✅ User login for issued accounts
 - ✅ JWT-based tokens
 - ✅ Role-based access control (Admin, Teacher, Student)
 - ✅ Secure password hashing
@@ -137,16 +137,18 @@ App (Root)
 
 ### Authentication
 ```
-POST   /api/v1/auth/register     - Register new user
 POST   /api/v1/auth/login        - Login user
-POST   /api/v1/auth/refresh      - Refresh token
 ```
+
+Note: public self-registration and refresh-token flows are not enabled in the current internal deployment.
 
 ### Students
 ```
 GET    /api/v1/students          - List all students
 GET    /api/v1/students/{id}     - Get student details
 POST   /api/v1/students          - Create student
+POST   /api/v1/students/import   - Bulk import students
+POST   /api/v1/students/bulk-delete - Bulk delete students
 PUT    /api/v1/students/{id}     - Update student
 DELETE /api/v1/students/{id}     - Delete student
 ```
@@ -231,7 +233,7 @@ Username: admin
 Password: admin123
 ```
 
-Or register a new account on the login page.
+Accounts are issued by the school or system administrator.
 
 ## 🧪 Testing the API
 
@@ -339,12 +341,12 @@ This project is licensed under the MIT License.
 - [ ] Advanced search and filtering
 - [ ] Pagination optimization
 - [ ] Caching layer
-- [ ] Unit and integration tests
+- [ ] Expand automated test coverage
 - [ ] Docker containerization
 
 ---
 
 **Created**: April 2026  
-**Last Updated**: April 7, 2026
+**Last Updated**: April 29, 2026
 
 For questions or issues, refer to [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md)

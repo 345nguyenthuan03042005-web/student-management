@@ -11,7 +11,12 @@ from ...services.student_service import AuthService
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
-@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/register",
+    response_model=UserResponse,
+    status_code=status.HTTP_201_CREATED,
+    include_in_schema=False,
+)
 async def register(
     user_data: UserCreate,
     db: Session = Depends(get_db)
@@ -40,8 +45,10 @@ async def login(
     return token
 
 
-@router.post("/refresh")
+@router.post("/refresh", include_in_schema=False)
 async def refresh_token():
     """Refresh JWT token."""
-    # TODO: Implement token refresh
-    pass
+    raise HTTPException(
+        status_code=status.HTTP_501_NOT_IMPLEMENTED,
+        detail="Token refresh is not implemented."
+    )

@@ -5,7 +5,8 @@ import { useLanguage } from '../hooks';
 export const StudentForm = ({ onSubmit, initialData = null, isLoading = false }) => {
   const { t } = useLanguage();
   const formCopy = t.studentForm;
-  const [formData, setFormData] = useState(initialData || {
+
+  const createEmptyFormData = () => ({
     student_code: '',
     first_name: '',
     last_name: '',
@@ -14,27 +15,33 @@ export const StudentForm = ({ onSubmit, initialData = null, isLoading = false })
     date_of_birth: '',
     gender: 'Male',
     address: '',
+    guardian_name: '',
+    guardian_phone: '',
     class_id: '',
     enrollment_date: new Date().toISOString().split('T')[0],
     status: 'Active'
   });
 
+  const normalizeFormData = (data) => ({
+    ...createEmptyFormData(),
+    ...data,
+    phone: data?.phone || '',
+    date_of_birth: data?.date_of_birth || '',
+    address: data?.address || '',
+    guardian_name: data?.guardian_name || '',
+    guardian_phone: data?.guardian_phone || '',
+    class_id: data?.class_id || '',
+    enrollment_date: data?.enrollment_date || new Date().toISOString().split('T')[0],
+    status: data?.status || 'Active',
+    gender: data?.gender || 'Male'
+  });
+
+  const [formData, setFormData] = useState(initialData ? normalizeFormData(initialData) : createEmptyFormData());
+
   const [errors, setErrors] = useState({});
 
   React.useEffect(() => {
-    setFormData(initialData || {
-      student_code: '',
-      first_name: '',
-      last_name: '',
-      email: '',
-      phone: '',
-      date_of_birth: '',
-      gender: 'Male',
-      address: '',
-      class_id: '',
-      enrollment_date: new Date().toISOString().split('T')[0],
-      status: 'Active'
-    });
+    setFormData(initialData ? normalizeFormData(initialData) : createEmptyFormData());
     setErrors({});
   }, [initialData]);
 
@@ -190,6 +197,32 @@ export const StudentForm = ({ onSubmit, initialData = null, isLoading = false })
 
       <div className="form-row">
         <div className="form-group">
+          <label htmlFor="guardian_name">{formCopy.guardianName}</label>
+          <input
+            type="text"
+            id="guardian_name"
+            name="guardian_name"
+            value={formData.guardian_name}
+            onChange={handleChange}
+            disabled={isLoading}
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="guardian_phone">{formCopy.guardianPhone}</label>
+          <input
+            type="tel"
+            id="guardian_phone"
+            name="guardian_phone"
+            value={formData.guardian_phone}
+            onChange={handleChange}
+            disabled={isLoading}
+          />
+        </div>
+      </div>
+
+      <div className="form-row">
+        <div className="form-group">
           <label htmlFor="class_id">{formCopy.class} *</label>
           <input
             type="number"
@@ -227,6 +260,7 @@ export const StudentForm = ({ onSubmit, initialData = null, isLoading = false })
             <option value="Active">{formCopy.active}</option>
             <option value="Inactive">{formCopy.inactive}</option>
             <option value="Graduated">{formCopy.graduated}</option>
+            <option value="Suspended">{formCopy.suspended}</option>
           </select>
         </div>
       </div>

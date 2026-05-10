@@ -11,7 +11,12 @@ import StudentDetailPage from '../pages/StudentDetailPage';
 import ClassDetailPage from '../pages/ClassDetailPage';
 import SubjectDetailPage from '../pages/SubjectDetailPage';
 import ScoreDetailPage from '../pages/ScoreDetailPage';
-
+import TeacherList from '../pages/TeacherList';
+import AcademicTermPage from '../pages/AcademicTermPage';
+import RoomPage from '../pages/RoomPage';
+import SchedulePage from '../pages/SchedulePage';
+import EnrollmentPage from '../pages/EnrollmentPage';
+import AttendancePage from '../pages/AttendancePage';
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useAuth();
 
@@ -27,7 +32,7 @@ export const AppRoutes = () => {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
-        
+
         <Route
           path="/dashboard"
           element={
@@ -36,7 +41,7 @@ export const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
-        
+
         <Route
           path="/students"
           element={
@@ -108,7 +113,157 @@ export const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
-        
+
+        <Route
+          path="/terms"
+          element={
+            <ProtectedRoute>
+              <AcademicTermPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/terms/create"
+          element={
+            <ProtectedRoute>
+              <AcademicTermPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/terms/edit/:termId"
+          element={
+            <ProtectedRoute>
+              <AcademicTermPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/rooms"
+          element={
+            <ProtectedRoute>
+              <RoomPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/rooms/create"
+          element={
+            <ProtectedRoute>
+              <RoomPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/rooms/edit/:roomId"
+          element={
+            <ProtectedRoute>
+              <RoomPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/schedule"
+          element={
+            <ProtectedRoute>
+              <SchedulePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/schedule/create"
+          element={
+            <ProtectedRoute>
+              <SchedulePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/schedule/edit/:scheduleId"
+          element={
+            <ProtectedRoute>
+              <SchedulePage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/enrollments"
+          element={
+            <ProtectedRoute>
+              <EnrollmentPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/enrollments/create"
+          element={
+            <ProtectedRoute>
+              <EnrollmentPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/enrollments/edit/:enrollmentId"
+          element={
+            <ProtectedRoute>
+              <EnrollmentPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/attendance"
+          element={
+            <ProtectedRoute>
+              <AttendancePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/attendance/create"
+          element={
+            <ProtectedRoute>
+              <AttendancePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/attendance/edit/:attendanceId"
+          element={
+            <ProtectedRoute>
+              <AttendancePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/teachers"
+          element={
+            <ProtectedRoute>
+              <TeacherList />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/teachers/create"
+          element={
+            <ProtectedRoute>
+              <TeacherList />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/teachers/edit/:id"
+          element={
+            <ProtectedRoute>
+              <TeacherList />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>

@@ -7,7 +7,10 @@ from sqlalchemy.orm import Session
 from typing import List
 from ...db.database import get_db
 from ...schemas.student_schema import (
-    ClassResponse, ClassCreate, ClassUpdate
+    ClassCreate,
+    ClassDetailResponse,
+    ClassResponse,
+    ClassUpdate,
 )
 from ...services.student_service import ClassService
 from ...crud.student_crud import ClassCRUD
@@ -30,7 +33,7 @@ async def get_classes(
     return classes
 
 
-@router.get("/{class_id}", response_model=dict)
+@router.get("/{class_id}", response_model=ClassDetailResponse)
 async def get_class(
     class_id: int,
     current_user: User = Depends(get_current_user),

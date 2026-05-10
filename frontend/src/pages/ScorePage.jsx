@@ -18,11 +18,11 @@ const EMPTY_SCORE = {
 };
 
 export const ScorePage = () => {
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
   const { user } = useAuth();
   const pageCopy = t.scoresPage;
   const commonCopy = t.common;
-  const detailsLabel = language === 'vi' ? 'Chi tiết' : 'Details';
+  const detailsLabel = commonCopy.details;
   const [scores, setScores] = React.useState([]);
   const [enrollments, setEnrollments] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
@@ -123,7 +123,7 @@ export const ScorePage = () => {
           <section className="content-hero">
             <div>
               <h1>{pageCopy.title}</h1>
-              <p>Quản lý các đầu điểm theo mã đăng ký học, kèm loại điểm, trọng số và ngày kiểm tra.</p>
+              <p>{pageCopy.description}</p>
             </div>
             <div className="content-hero-actions">
               <button
@@ -299,7 +299,7 @@ export const ScorePage = () => {
                             </button>
                           </>
                         ) : (
-                          <span className="muted-text">Chỉ xem</span>
+                          <span className="muted-text">{commonCopy.viewOnly}</span>
                         )}
                       </td>
                     </tr>

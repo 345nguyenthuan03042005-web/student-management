@@ -117,6 +117,55 @@ class Teacher(Base):
     homeroom_classes = relationship("Class", back_populates="homeroom_teacher")
     assignments = relationship("ClassSubject", back_populates="teacher")
 
+    # --- Vietnamese API compatibility (used by /teachers endpoints) ---
+    @property
+    def ma_giao_vien(self) -> str:
+        return self.teacher_code
+
+    @ma_giao_vien.setter
+    def ma_giao_vien(self, value: str) -> None:
+        self.teacher_code = value
+
+    @property
+    def ho(self) -> str:
+        return self.last_name
+
+    @ho.setter
+    def ho(self, value: str) -> None:
+        self.last_name = value
+
+    @property
+    def ten(self) -> str:
+        return self.first_name
+
+    @ten.setter
+    def ten(self, value: str) -> None:
+        self.first_name = value
+
+    @property
+    def so_dien_thoai(self) -> str | None:
+        return self.phone
+
+    @so_dien_thoai.setter
+    def so_dien_thoai(self, value: str | None) -> None:
+        self.phone = value
+
+    @property
+    def trinh_do(self) -> str | None:
+        return self.qualification
+
+    @trinh_do.setter
+    def trinh_do(self, value: str | None) -> None:
+        self.qualification = value
+
+    @property
+    def ngay_vao_lam(self):
+        return self.hire_date
+
+    @ngay_vao_lam.setter
+    def ngay_vao_lam(self, value) -> None:
+        self.hire_date = value
+
 
 class AcademicTerm(Base):
     __tablename__ = "hoc_ky"
@@ -417,4 +466,3 @@ class Attendance(Base):
     @status.setter
     def status(self, value: str) -> None:
         self._status_db = ATTENDANCE_STATUS_API_TO_DB.get(value, value)
-

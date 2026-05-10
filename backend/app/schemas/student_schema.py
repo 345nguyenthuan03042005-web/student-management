@@ -3,7 +3,7 @@ Pydantic schemas aligned with the current database schema.
 """
 
 from datetime import date, datetime, time
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -97,6 +97,7 @@ class StudentUpdate(BaseModel):
     gender: Optional[str] = Field(None, pattern="^(Male|Female|Other)$")
     address: Optional[str] = None
     class_id: Optional[int] = Field(None, gt=0)
+    enrollment_date: Optional[date] = None
     guardian_name: Optional[str] = Field(None, max_length=150)
     guardian_phone: Optional[str] = Field(None, max_length=20)
     status: Optional[str] = Field(None, pattern="^(Active|Inactive|Graduated|Suspended)$")
@@ -269,3 +270,67 @@ class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserResponse
+
+
+class ClassSubjectResponse(BaseModel):
+    id: int
+    class_id: int
+    subject_id: int
+    academic_term_id: int
+    teacher_id: Optional[int] = None
+    assigned_at: Optional[date] = None
+    is_required: bool = True
+
+    class Config:
+        from_attributes = True
+
+
+class StudentDetailResponse(BaseModel):
+    student: StudentResponse
+    class_info: Optional[ClassResponse] = Field(None, alias="class")
+    enrollments: List[EnrollmentResponse] = []
+    scores: List[ScoreResponse] = []
+    average_score: Optional[float] = None
+
+    class Config:
+        populate_by_name = True
+
+
+class ClassDetailResponse(BaseModel):
+    class_info: ClassResponse = Field(..., alias="class")
+    students: List[StudentResponse] = []
+    student_count: int = 0
+    class_subjects: List[ClassSubjectResponse] = []
+
+    class Config:
+        populate_by_name = True
+
+
+class SubjectDetailResponse(BaseModel):
+    subject: SubjectResponse
+    class_subjects: List[ClassSubjectResponse] = []
+    scores: List[ScoreResponse] = []
+    score_count: int = 0
+    average_score: Optional[float] = None
+
+
+class StudentImportError(BaseModel):
+    row: int
+    student_code: Optional[str] = None
+    error: str
+
+
+class StudentImportResult(BaseModel):
+    created_count: int
+    error_count: int
+    created_students: List[StudentResponse] = []
+    errors: List[StudentImportError] = []
+
+
+class StudentBulkDeleteRequest(BaseModel):
+    student_ids: List[int] = Field(..., min_length=1)
+
+
+class StudentBulkDeleteResponse(BaseModel):
+    deleted_count: int
+    missing_ids: List[int] = []

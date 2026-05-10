@@ -84,6 +84,22 @@ class StudentCRUD:
         db.commit()
         return True
 
+    @staticmethod
+    def delete_students(db: Session, student_ids: List[int]) -> dict:
+        unique_ids = list(dict.fromkeys(student_ids))
+        students = db.query(Student).filter(Student.id.in_(unique_ids)).all()
+        found_ids = {student.id for student in students}
+        missing_ids = [student_id for student_id in unique_ids if student_id not in found_ids]
+
+        for student in students:
+            db.delete(student)
+
+        db.commit()
+        return {
+            "deleted_count": len(students),
+            "missing_ids": missing_ids,
+        }
+
 
 class ClassCRUD:
     @staticmethod

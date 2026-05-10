@@ -8,7 +8,8 @@ $ErrorActionPreference = 'Stop'
 # Run backend in a new PowerShell window, then run frontend in the current one.
 # Optionally start Electron in a separate window with -Desktop.
 
-$projectRoot = 'D:\OSS\student_management'
+$projectRoot = $PSScriptRoot
+Write-Host "Using project root: $projectRoot"
 $backendPython = Join-Path $projectRoot 'backend\venv\Scripts\python.exe'
 $frontendPath = Join-Path $projectRoot 'frontend'
 $desktopPath = Join-Path $projectRoot 'desktop'

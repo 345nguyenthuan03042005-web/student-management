@@ -6,47 +6,11 @@ import { ClassService } from '../services/studentService';
 import { useLanguage } from '../hooks';
 import './StudentPage.css';
 
-const copyByLanguage = {
-  vi: {
-    title: 'Chi tiết lớp học',
-    overview: 'Tổng quan lớp',
-    studentCount: 'Số sinh viên',
-    classSubjects: 'Môn học theo lớp',
-    students: 'Danh sách sinh viên',
-    gradeLevel: 'Khối',
-    academicYear: 'Niên khóa',
-    capacity: 'Sức chứa',
-    description: 'Mô tả',
-    classSubjectId: 'Mã lớp-môn',
-    subjectId: 'Mã môn',
-    termId: 'Mã học kỳ',
-    studentCode: 'Mã sinh viên',
-    fullName: 'Họ tên',
-    email: 'Email'
-  },
-  en: {
-    title: 'Class Details',
-    overview: 'Class overview',
-    studentCount: 'Students',
-    classSubjects: 'Assigned subjects',
-    students: 'Students',
-    gradeLevel: 'Grade level',
-    academicYear: 'Academic year',
-    capacity: 'Capacity',
-    description: 'Description',
-    classSubjectId: 'Class-subject ID',
-    subjectId: 'Subject ID',
-    termId: 'Term ID',
-    studentCode: 'Student code',
-    fullName: 'Full name',
-    email: 'Email'
-  }
-};
-
 export const ClassDetailPage = () => {
   const { classId } = useParams();
-  const { language, t } = useLanguage();
-  const copy = copyByLanguage[language] || copyByLanguage.en;
+  const { t } = useLanguage();
+  const commonCopy = t.common;
+  const copy = t.classDetailPage;
   const [data, setData] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
 
@@ -80,22 +44,22 @@ export const ClassDetailPage = () => {
           <section className="content-hero">
             <div>
               <h1>{copy.title}</h1>
-              <p>{classItem?.name || t.common.loading}</p>
+              <p>{classItem?.name || commonCopy.loading}</p>
             </div>
             <div className="content-hero-actions">
               <Link to="/classes" className="btn-primary btn-secondary-tone">
-                {language === 'vi' ? 'Quay lại danh sách' : 'Back to list'}
+                {commonCopy.backToList}
               </Link>
             </div>
           </section>
 
           {loading ? (
             <div className="form-section">
-              <p className="loading">{t.common.loading}</p>
+              <p className="loading">{commonCopy.loading}</p>
             </div>
           ) : !classItem ? (
             <div className="form-section">
-              <p className="no-data">{language === 'vi' ? 'Không tìm thấy lớp học' : 'Class not found'}</p>
+              <p className="no-data">{copy.notFound}</p>
             </div>
           ) : (
             <>
@@ -113,20 +77,13 @@ export const ClassDetailPage = () => {
                 <article className="detail-card">
                   <span className="detail-card-label">{copy.studentCount}</span>
                   <strong>{data?.student_count || students.length}</strong>
-                  <p>{language === 'vi' ? 'hồ sơ đang hoạt động' : 'active records'}</p>
+                  <p>{copy.activeRecords}</p>
                 </article>
                 <article className="detail-card">
                   <span className="detail-card-label">{copy.classSubjects}</span>
                   <strong>{classSubjects.length}</strong>
-                  <p>{language === 'vi' ? 'phân công lớp-môn' : 'subject assignments'}</p>
+                  <p>{copy.subjectAssignments}</p>
                 </article>
-              </section>
-
-              <section className="form-section">
-                <div className="section-heading">
-                  <h2>{copy.description}</h2>
-                </div>
-                <p className="detail-paragraph">{classItem.description || '-'}</p>
               </section>
 
               <section className="students-table-section detail-section">
@@ -134,7 +91,7 @@ export const ClassDetailPage = () => {
                   <h2>{copy.students}</h2>
                 </div>
                 {students.length === 0 ? (
-                  <p className="no-data detail-empty">{t.common.noData}</p>
+                  <p className="no-data detail-empty">{commonCopy.noData}</p>
                 ) : (
                   <table className="students-table">
                     <thead>
@@ -152,7 +109,7 @@ export const ClassDetailPage = () => {
                               {item.student_code}
                             </Link>
                           </td>
-                          <td>{item.first_name} {item.last_name}</td>
+                          <td>{item.last_name} {item.first_name}</td>
                           <td>{item.email}</td>
                         </tr>
                       ))}
@@ -166,7 +123,7 @@ export const ClassDetailPage = () => {
                   <h2>{copy.classSubjects}</h2>
                 </div>
                 {classSubjects.length === 0 ? (
-                  <p className="no-data detail-empty">{t.common.noData}</p>
+                  <p className="no-data detail-empty">{commonCopy.noData}</p>
                 ) : (
                   <table className="students-table">
                     <thead>

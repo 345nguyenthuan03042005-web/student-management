@@ -42,6 +42,47 @@ export const Sidebar = ({ activeMenu }) => {
             <span className="label">{t.common.scores}</span>
           </a>
         </div>
+
+        <div className={`menu-item ${activeMenu === 'terms' ? 'active' : ''}`}>
+          <a href="/terms">
+            <span className="icon">HK</span>
+            <span className="label">{t.common.terms}</span>
+          </a>
+        </div>
+
+        <div className={`menu-item ${activeMenu === 'rooms' ? 'active' : ''}`}>
+          <a href="/rooms">
+            <span className="icon">PH</span>
+            <span className="label">{t.common.rooms}</span>
+          </a>
+        </div>
+
+        <div className={`menu-item ${activeMenu === 'schedule' ? 'active' : ''}`}>
+          <a href="/schedule">
+            <span className="icon">LC</span>
+            <span className="label">{t.common.schedule}</span>
+          </a>
+        </div>
+
+        <div className={`menu-item ${activeMenu === 'enrollments' ? 'active' : ''}`}>
+          <a href="/enrollments">
+            <span className="icon">DK</span>
+            <span className="label">{t.common.enrollments}</span>
+          </a>
+        </div>
+
+        <div className={`menu-item ${activeMenu === 'attendance' ? 'active' : ''}`}>
+          <a href="/attendance">
+            <span className="icon">DD</span>
+            <span className="label">{t.common.attendance}</span>
+          </a>
+        </div>
+        <div className={`menu-item ${activeMenu === 'teachers' ? 'active' : ''}`}>
+          <a href="/teachers">
+            <span className="icon">GV</span>
+            <span className="label">{t.common.teachers}</span>
+          </a>
+        </div>
       </div>
     </aside>
   );

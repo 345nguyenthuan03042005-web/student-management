@@ -7,7 +7,10 @@ from sqlalchemy.orm import Session
 from typing import List
 from ...db.database import get_db
 from ...schemas.student_schema import (
-    SubjectResponse, SubjectCreate, SubjectUpdate
+    SubjectCreate,
+    SubjectDetailResponse,
+    SubjectResponse,
+    SubjectUpdate,
 )
 from ...services.student_service import SubjectService
 from ...crud.student_crud import SubjectCRUD
@@ -30,7 +33,7 @@ async def get_subjects(
     return subjects
 
 
-@router.get("/{subject_id}", response_model=dict)
+@router.get("/{subject_id}", response_model=SubjectDetailResponse)
 async def get_subject(
     subject_id: int,
     current_user: User = Depends(get_current_user),

@@ -115,7 +115,7 @@ export const Dashboard = () => {
                   {recentStudents.map((student) => (
                     <div key={student.id} className="recent-item">
                       <div>
-                        <strong>{student.first_name} {student.last_name}</strong>
+                        <strong>{student.last_name} {student.first_name}</strong>
                         <p>{student.student_code} • {student.email}</p>
                       </div>
                       <span className={`status ${String(student.status || '').toLowerCase()}`}>

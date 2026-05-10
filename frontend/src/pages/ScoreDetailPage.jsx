@@ -6,47 +6,13 @@ import { EnrollmentService, ScoreService, StudentService } from '../services/stu
 import { useLanguage } from '../hooks';
 import './StudentPage.css';
 
-const copyByLanguage = {
-  vi: {
-    title: 'Chi tiết điểm số',
-    summary: 'Tổng quan đầu điểm',
-    scoreType: 'Loại điểm',
-    score: 'Điểm',
-    maxScore: 'Điểm tối đa',
-    weight: 'Trọng số',
-    grade: 'Xếp loại',
-    examDate: 'Ngày kiểm tra',
-    remarks: 'Ghi chú',
-    enrollment: 'Đăng ký học',
-    enrollmentId: 'Mã đăng ký',
-    student: 'Sinh viên',
-    studentId: 'Mã sinh viên',
-    classSubjectId: 'Mã lớp-môn'
-  },
-  en: {
-    title: 'Score Details',
-    summary: 'Score overview',
-    scoreType: 'Score type',
-    score: 'Score',
-    maxScore: 'Max score',
-    weight: 'Weight',
-    grade: 'Grade',
-    examDate: 'Exam date',
-    remarks: 'Remarks',
-    enrollment: 'Enrollment',
-    enrollmentId: 'Enrollment ID',
-    student: 'Student',
-    studentId: 'Student ID',
-    classSubjectId: 'Class-subject ID'
-  }
-};
-
 const formatDate = (value) => (value ? new Date(value).toLocaleDateString() : '-');
 
 export const ScoreDetailPage = () => {
   const { scoreId } = useParams();
-  const { language, t } = useLanguage();
-  const copy = copyByLanguage[language] || copyByLanguage.en;
+  const { t } = useLanguage();
+  const commonCopy = t.common;
+  const copy = t.scoreDetailPage;
   const [score, setScore] = React.useState(null);
   const [enrollment, setEnrollment] = React.useState(null);
   const [studentDetail, setStudentDetail] = React.useState(null);
@@ -87,22 +53,22 @@ export const ScoreDetailPage = () => {
           <section className="content-hero">
             <div>
               <h1>{copy.title}</h1>
-              <p>{score ? `#${score.id}` : t.common.loading}</p>
+              <p>{score ? `#${score.id}` : commonCopy.loading}</p>
             </div>
             <div className="content-hero-actions">
               <Link to="/scores" className="btn-primary btn-secondary-tone">
-                {language === 'vi' ? 'Quay lại danh sách' : 'Back to list'}
+                {commonCopy.backToList}
               </Link>
             </div>
           </section>
 
           {loading ? (
             <div className="form-section">
-              <p className="loading">{t.common.loading}</p>
+              <p className="loading">{commonCopy.loading}</p>
             </div>
           ) : !score ? (
             <div className="form-section">
-              <p className="no-data">{language === 'vi' ? 'Không tìm thấy đầu điểm' : 'Score not found'}</p>
+              <p className="no-data">{copy.notFound}</p>
             </div>
           ) : (
             <>
@@ -143,7 +109,7 @@ export const ScoreDetailPage = () => {
                     <strong>
                       {studentDetail?.student ? (
                         <Link to={`/students/${studentDetail.student.id}`} className="table-inline-link">
-                          {studentDetail.student.first_name} {studentDetail.student.last_name}
+                          {studentDetail.student.last_name} {studentDetail.student.first_name}
                         </Link>
                       ) : '-'}
                     </strong>

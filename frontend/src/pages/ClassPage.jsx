@@ -11,16 +11,15 @@ const EMPTY_CLASS = {
   name: '',
   grade_level: '',
   academic_year: '',
-  capacity: '',
-  description: ''
+  capacity: ''
 };
 
 export const ClassPage = () => {
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
   const { user } = useAuth();
   const pageCopy = t.classesPage;
   const commonCopy = t.common;
-  const detailsLabel = language === 'vi' ? 'Chi tiết' : 'Details';
+  const detailsLabel = commonCopy.details;
   const [classes, setClasses] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
   const [showForm, setShowForm] = React.useState(false);
@@ -52,8 +51,7 @@ export const ClassPage = () => {
             name: editingClass.name || '',
             grade_level: editingClass.grade_level || '',
             academic_year: editingClass.academic_year || '',
-            capacity: editingClass.capacity || '',
-            description: editingClass.description || ''
+            capacity: editingClass.capacity || ''
           }
         : EMPTY_CLASS
     );
@@ -110,7 +108,7 @@ export const ClassPage = () => {
           <section className="content-hero">
             <div>
               <h1>{pageCopy.title}</h1>
-              <p>Theo dõi cấu trúc lớp học, niên khóa và sức chứa của từng lớp trong hệ thống.</p>
+              <p>{pageCopy.description}</p>
             </div>
             <div className="content-hero-actions">
               <button
@@ -123,8 +121,7 @@ export const ClassPage = () => {
                       name: item.name,
                       grade_level: item.grade_level || '',
                       academic_year: item.academic_year || '',
-                      capacity: item.capacity || '',
-                      description: item.description || ''
+                      capacity: item.capacity || ''
                     }))
                   )
                 }
@@ -176,12 +173,6 @@ export const ClassPage = () => {
                     placeholder={pageCopy.capacity}
                   />
                 </div>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-                  placeholder={pageCopy.description}
-                  rows="4"
-                />
                 <div className="form-actions">
                   <button type="submit" className="btn-submit" disabled={loading}>
                     {loading ? commonCopy.loading : editingClass ? commonCopy.update : commonCopy.save}
@@ -214,7 +205,6 @@ export const ClassPage = () => {
                     <th>{pageCopy.gradeLevel}</th>
                     <th>{pageCopy.academicYear}</th>
                     <th>{pageCopy.capacity}</th>
-                    <th>{pageCopy.description}</th>
                     <th>{commonCopy.actions}</th>
                   </tr>
                 </thead>
@@ -225,7 +215,6 @@ export const ClassPage = () => {
                       <td>{item.grade_level || '-'}</td>
                       <td>{item.academic_year || '-'}</td>
                       <td>{item.capacity || '-'}</td>
-                      <td>{item.description || '-'}</td>
                       <td className="actions">
                         <Link to={`/classes/${item.id}`} className="btn-small btn-info">
                           {detailsLabel}
@@ -251,7 +240,7 @@ export const ClassPage = () => {
                             </button>
                           </>
                         ) : (
-                          <span className="muted-text">Chỉ xem</span>
+                          <span className="muted-text">{commonCopy.viewOnly}</span>
                         )}
                       </td>
                     </tr>

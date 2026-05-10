@@ -6,69 +6,13 @@ import { StudentService } from '../services/studentService';
 import { useLanguage } from '../hooks';
 import './StudentPage.css';
 
-const copyByLanguage = {
-  vi: {
-    title: 'Chi tiết sinh viên',
-    summary: 'Tổng quan hồ sơ',
-    personalInfo: 'Thông tin cá nhân',
-    enrollments: 'Đăng ký học',
-    scores: 'Điểm số',
-    classInfo: 'Lớp hiện tại',
-    enrollmentDate: 'Ngày nhập học',
-    averageScore: 'Điểm trung bình',
-    studentCode: 'Mã sinh viên',
-    fullName: 'Họ tên',
-    email: 'Email',
-    phone: 'Số điện thoại',
-    gender: 'Giới tính',
-    dateOfBirth: 'Ngày sinh',
-    address: 'Địa chỉ',
-    guardianName: 'Tên người giám hộ',
-    guardianPhone: 'Số điện thoại người giám hộ',
-    status: 'Trạng thái',
-    enrollmentId: 'Mã đăng ký',
-    classSubjectId: 'Mã lớp-môn',
-    scoreType: 'Loại điểm',
-    score: 'Điểm',
-    examDate: 'Ngày kiểm tra',
-    emptyEnrollments: 'Chưa có đăng ký học',
-    emptyScores: 'Chưa có điểm số'
-  },
-  en: {
-    title: 'Student Details',
-    summary: 'Profile summary',
-    personalInfo: 'Personal information',
-    enrollments: 'Enrollments',
-    scores: 'Scores',
-    classInfo: 'Current class',
-    enrollmentDate: 'Enrollment date',
-    averageScore: 'Average score',
-    studentCode: 'Student code',
-    fullName: 'Full name',
-    email: 'Email',
-    phone: 'Phone',
-    gender: 'Gender',
-    dateOfBirth: 'Date of birth',
-    address: 'Address',
-    guardianName: 'Guardian name',
-    guardianPhone: 'Guardian phone',
-    status: 'Status',
-    enrollmentId: 'Enrollment ID',
-    classSubjectId: 'Class-subject ID',
-    scoreType: 'Score type',
-    score: 'Score',
-    examDate: 'Exam date',
-    emptyEnrollments: 'No enrollments yet',
-    emptyScores: 'No scores yet'
-  }
-};
-
 const formatDate = (value) => (value ? new Date(value).toLocaleDateString() : '-');
 
 export const StudentDetailPage = () => {
   const { studentId } = useParams();
-  const { language, t } = useLanguage();
-  const copy = copyByLanguage[language] || copyByLanguage.en;
+  const { t } = useLanguage();
+  const commonCopy = t.common;
+  const copy = t.studentDetailPage;
   const [data, setData] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
 
@@ -94,6 +38,18 @@ export const StudentDetailPage = () => {
   const enrollments = data?.enrollments || [];
   const scores = data?.scores || [];
 
+  const renderStudentStatus = (value) => {
+    const map = {
+      Active: t.studentsPage.active,
+      Inactive: t.studentsPage.inactive,
+      Graduated: t.studentsPage.graduated,
+      Suspended: t.studentsPage.suspended
+    };
+    return map[value] ?? value;
+  };
+
+  const renderEnrollmentStatus = (value) => t.enrollmentsPage.statusLabels?.[value] ?? value;
+
   return (
     <div className="layout">
       <Navbar />
@@ -103,22 +59,22 @@ export const StudentDetailPage = () => {
           <section className="content-hero">
             <div>
               <h1>{copy.title}</h1>
-              <p>{student ? `${student.first_name} ${student.last_name}` : t.common.loading}</p>
+              <p>{student ? `${student.last_name} ${student.first_name}` : commonCopy.loading}</p>
             </div>
             <div className="content-hero-actions">
               <Link to="/students" className="btn-primary btn-secondary-tone">
-                {language === 'vi' ? 'Quay lại danh sách' : 'Back to list'}
+                {commonCopy.backToList}
               </Link>
             </div>
           </section>
 
           {loading ? (
             <div className="form-section">
-              <p className="loading">{t.common.loading}</p>
+              <p className="loading">{commonCopy.loading}</p>
             </div>
           ) : !student ? (
             <div className="form-section">
-              <p className="no-data">{language === 'vi' ? 'Không tìm thấy sinh viên' : 'Student not found'}</p>
+              <p className="no-data">{copy.notFound}</p>
             </div>
           ) : (
             <>
@@ -136,12 +92,12 @@ export const StudentDetailPage = () => {
                 <article className="detail-card">
                   <span className="detail-card-label">{copy.enrollmentDate}</span>
                   <strong>{formatDate(student.enrollment_date)}</strong>
-                  <p>{copy.status}: {student.status}</p>
+                  <p>{copy.status}: {renderStudentStatus(student.status)}</p>
                 </article>
                 <article className="detail-card">
                   <span className="detail-card-label">{copy.averageScore}</span>
                   <strong>{data?.average_score ?? '-'}</strong>
-                  <p>{scores.length} {language === 'vi' ? 'đầu điểm' : 'records'}</p>
+                  <p>{scores.length} {copy.scoreRecordsSuffix}</p>
                 </article>
               </section>
 
@@ -152,7 +108,7 @@ export const StudentDetailPage = () => {
                 <div className="detail-info-grid">
                   <div className="detail-info-item">
                     <span>{copy.fullName}</span>
-                    <strong>{student.first_name} {student.last_name}</strong>
+                    <strong>{student.last_name} {student.first_name}</strong>
                   </div>
                   <div className="detail-info-item">
                     <span>{copy.email}</span>
@@ -205,7 +161,7 @@ export const StudentDetailPage = () => {
                         <tr key={item.id}>
                           <td>#{item.id}</td>
                           <td>#{item.class_subject_id}</td>
-                          <td>{item.status}</td>
+                          <td>{renderEnrollmentStatus(item.status)}</td>
                         </tr>
                       ))}
                     </tbody>

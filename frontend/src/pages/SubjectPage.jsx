@@ -11,16 +11,15 @@ const EMPTY_SUBJECT = {
   name: '',
   code: '',
   credits: 3,
-  description: '',
-  is_active: true
+  description: ''
 };
 
 export const SubjectPage = () => {
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
   const { user } = useAuth();
   const pageCopy = t.subjectsPage;
   const commonCopy = t.common;
-  const detailsLabel = language === 'vi' ? 'Chi tiết' : 'Details';
+  const detailsLabel = commonCopy.details;
   const [subjects, setSubjects] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
   const [showForm, setShowForm] = React.useState(false);
@@ -52,8 +51,7 @@ export const SubjectPage = () => {
             name: editingSubject.name || '',
             code: editingSubject.code || '',
             credits: editingSubject.credits || 3,
-            description: editingSubject.description || '',
-            is_active: editingSubject.is_active ?? true
+            description: editingSubject.description || ''
           }
         : EMPTY_SUBJECT
     );
@@ -109,7 +107,7 @@ export const SubjectPage = () => {
           <section className="content-hero">
             <div>
               <h1>{pageCopy.title}</h1>
-              <p>Chuẩn hóa danh mục môn học, mã môn và tín chỉ để dùng thống nhất trên toàn hệ thống.</p>
+              <p>{pageCopy.description}</p>
             </div>
             <div className="content-hero-actions">
               <button
@@ -122,8 +120,7 @@ export const SubjectPage = () => {
                       name: item.name,
                       code: item.code,
                       credits: item.credits,
-                      description: item.description || '',
-                      is_active: item.is_active
+                      description: item.description || ''
                     }))
                   )
                 }
@@ -173,18 +170,11 @@ export const SubjectPage = () => {
                     placeholder={pageCopy.credits}
                     required
                   />
-                  <select
-                    value={formData.is_active ? 'true' : 'false'}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, is_active: e.target.value === 'true' }))}
-                  >
-                    <option value="true">{pageCopy.active}</option>
-                    <option value="false">{pageCopy.inactive}</option>
-                  </select>
                 </div>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-                  placeholder={pageCopy.description}
+                  placeholder={pageCopy.descriptionLabel}
                   rows="4"
                 />
                 <div className="form-actions">
@@ -218,7 +208,7 @@ export const SubjectPage = () => {
                     <th>{pageCopy.name}</th>
                     <th>{pageCopy.code}</th>
                     <th>{pageCopy.credits}</th>
-                    <th>{pageCopy.description}</th>
+                    <th>{pageCopy.descriptionLabel}</th>
                     <th>{commonCopy.status}</th>
                     <th>{commonCopy.actions}</th>
                   </tr>
@@ -260,7 +250,7 @@ export const SubjectPage = () => {
                             </button>
                           </>
                         ) : (
-                          <span className="muted-text">Chỉ xem</span>
+                          <span className="muted-text">{commonCopy.viewOnly}</span>
                         )}
                       </td>
                     </tr>

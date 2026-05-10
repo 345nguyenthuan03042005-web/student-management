@@ -7,7 +7,13 @@ from sqlalchemy.orm import Session
 from typing import List
 from ...db.database import get_db
 from ...schemas.student_schema import (
-    StudentResponse, StudentCreate, StudentUpdate
+    StudentBulkDeleteRequest,
+    StudentBulkDeleteResponse,
+    StudentResponse,
+    StudentCreate,
+    StudentDetailResponse,
+    StudentImportResult,
+    StudentUpdate,
 )
 from ...services.student_service import StudentService
 from ...models.student import User
@@ -35,24 +41,6 @@ async def get_students(
     return students
 
 
-@router.get("/{student_id}", response_model=dict)
-async def get_student(
-    student_id: int,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """Get detailed information about a specific student."""
-    student_details = StudentService.get_student_details(db, student_id)
-
-    if not student_details:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Student not found"
-        )
-
-    return student_details
-
-
 @router.post("", response_model=StudentResponse, status_code=status.HTTP_201_CREATED)
 @router.post("/", response_model=StudentResponse, status_code=status.HTTP_201_CREATED)
 async def create_student(
@@ -72,7 +60,7 @@ async def create_student(
     return student
 
 
-@router.post("/import", response_model=dict, status_code=status.HTTP_201_CREATED)
+@router.post("/import", response_model=StudentImportResult, status_code=status.HTTP_201_CREATED)
 async def import_students(
     students_data: List[StudentCreate],
     current_user: User = Depends(get_teacher_user),
@@ -83,7 +71,38 @@ async def import_students(
     return result
 
 
-@router.put("/{student_id}", response_model=StudentResponse)
+@router.post("/bulk-delete", response_model=StudentBulkDeleteResponse)
+async def delete_students_bulk_post(
+    payload: StudentBulkDeleteRequest,
+    current_user: User = Depends(get_teacher_user),
+    db: Session = Depends(get_db)
+):
+    """Delete multiple students at once via explicit bulk endpoint."""
+    from ...crud.student_crud import StudentCRUD
+
+    result = StudentCRUD.delete_students(db, payload.student_ids)
+    return result
+
+
+@router.get("/{student_id:int}", response_model=StudentDetailResponse)
+async def get_student(
+    student_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get detailed information about a specific student."""
+    student_details = StudentService.get_student_details(db, student_id)
+
+    if not student_details:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Student not found"
+        )
+
+    return student_details
+
+
+@router.put("/{student_id:int}", response_model=StudentResponse)
 async def update_student(
     student_id: int,
     student_data: StudentUpdate,
@@ -104,7 +123,21 @@ async def update_student(
     return student
 
 
-@router.delete("/{student_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("", response_model=StudentBulkDeleteResponse)
+@router.delete("/", response_model=StudentBulkDeleteResponse)
+async def delete_students_bulk(
+    payload: StudentBulkDeleteRequest,
+    current_user: User = Depends(get_teacher_user),
+    db: Session = Depends(get_db)
+):
+    """Delete multiple students at once (teacher/admin only)."""
+    from ...crud.student_crud import StudentCRUD
+
+    result = StudentCRUD.delete_students(db, payload.student_ids)
+    return result
+
+
+@router.delete("/{student_id:int}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_student(
     student_id: int,
     current_user: User = Depends(get_teacher_user),
