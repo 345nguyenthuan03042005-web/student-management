@@ -180,6 +180,7 @@ class ScoreService:
         score = ScoreCRUD.create_score(db, score_data)
         return score, None
 
+
 class AuthService:
 
     @staticmethod
