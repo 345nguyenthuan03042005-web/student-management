@@ -40,7 +40,6 @@ app.add_middleware(
 from .api.routes.auth import router as auth_router
 from .api.routes.student import router as student_router
 from .api.routes.class_route import router as class_route_router
-from .api.routes.class_subject import router as class_subject_router
 from .api.routes.enrollment import router as enrollment_router
 from .api.routes.room import router as room_router
 from .api.routes.teacher import router as teacher_router
@@ -56,7 +55,6 @@ from .api.routes.subject import router as subject_router
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(student_router, prefix="/api/v1")
 app.include_router(class_route_router, prefix="/api/v1")
-app.include_router(class_subject_router, prefix="/api/v1")
 app.include_router(enrollment_router, prefix="/api/v1")
 app.include_router(room_router, prefix="/api/v1")
 app.include_router(teacher_router, prefix="/api/v1")
