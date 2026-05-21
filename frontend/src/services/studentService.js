@@ -1,126 +1,164 @@
-import apiClient from './api';
+import axios from 'axios';
 
-// ================== STUDENT ==================
-export class StudentService {
-  static getStudents(params = {}) {
-    return apiClient.get('/api/v1/students', { params });
+// ================== AXIOS CLIENT ==================
+const apiClient = axios.create({
+  baseURL: "https://student-management-api-t1sl.onrender.com",
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// ================== INTERCEPTOR ==================
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('access_token');
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
 
-  static getStudent(studentId) {
-    return apiClient.get(`/api/v1/students/${studentId}`);
-  }
+  return config;
+});
 
-  static createStudent(studentData) {
-    return apiClient.post('/api/v1/students', studentData);
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
   }
-
-  static importStudentsBulk(studentsData) {
-    return apiClient.post('/api/v1/students/import', studentsData);
-  }
-
-  static updateStudent(studentId, studentData) {
-    return apiClient.put(`/api/v1/students/${studentId}`, studentData);
-  }
-
-  static deleteStudent(studentId) {
-    return apiClient.delete(`/api/v1/students/${studentId}`);
-  }
-
-  static deleteStudentsBulk(studentIds) {
-    return apiClient.post('/api/v1/students/bulk-delete', {
-      student_ids: studentIds
-    });
-  }
-
-  static getStudentsByClass(classId, params = {}) {
-    return apiClient.get('/api/v1/students', {
-      params: { ...params, class_id: classId }
-    });
-  }
-}
-
-// ================== CLASS ==================
-export class ClassService {
-  static getClasses(params = {}) {
-    return apiClient.get('/api/v1/classes', { params });
-  }
-
-  static getClass(classId) {
-    return apiClient.get(`/api/v1/classes/${classId}`);
-  }
-
-  static createClass(classData) {
-    return apiClient.post('/api/v1/classes', classData);
-  }
-
-  static updateClass(classId, classData) {
-    return apiClient.put(`/api/v1/classes/${classId}`, classData);
-  }
-
-  static deleteClass(classId) {
-    return apiClient.delete(`/api/v1/classes/${classId}`);
-  }
-}
-
-// ================== SUBJECT ==================
-export class SubjectService {
-  static getSubjects(params = {}) {
-    return apiClient.get('/api/v1/subjects', { params });
-  }
-
-  static getSubject(subjectId) {
-    return apiClient.get(`/api/v1/subjects/${subjectId}`);
-  }
-
-  static createSubject(subjectData) {
-    return apiClient.post('/api/v1/subjects', subjectData);
-  }
-
-  static updateSubject(subjectId, subjectData) {
-    return apiClient.put(`/api/v1/subjects/${subjectId}`, subjectData);
-  }
-
-  static deleteSubject(subjectId) {
-    return apiClient.delete(`/api/v1/subjects/${subjectId}`);
-  }
-}
+);
 
 // ================== AUTH ==================
-export class AuthService {
-  static login(credentials) {
-    return apiClient.post('/api/v1/auth/login', credentials);
-  }
+export const AuthService = {
+  login: (credentials) =>
+    apiClient.post('/api/v1/auth/login', credentials),
 
-  static logout() {
+  logout: () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('user');
-  }
+  },
 
-  static getCurrentUser() {
+  getCurrentUser: () => {
     const user = localStorage.getItem('user');
     return user ? JSON.parse(user) : null;
-  }
+  },
 
-  static isAuthenticated() {
-    return !!localStorage.getItem('access_token');
-  }
-}
+  isAuthenticated: () =>
+    !!localStorage.getItem('access_token'),
+};
 
-// ================== EXTRA (nếu dùng sau này) ==================
-export class EnrollmentService {
-  static getEnrollments(params = {}) {
-    return apiClient.get('/api/v1/enrollments', { params });
-  }
-}
+// ================== STUDENT ==================
+export const StudentService = {
+  getAll: (params = {}) =>
+    apiClient.get('/api/v1/students', { params }),
 
-export class RoomService {
-  static getRooms(params = {}) {
-    return apiClient.get('/api/v1/rooms', { params });
-  }
-}
+  getById: (id) =>
+    apiClient.get(`/api/v1/students/${id}`),
 
-export class ScoreService {
-  static getScores(params = {}) {
-    return apiClient.get('/api/v1/scores', { params });
-  }
-}
+  create: (data) =>
+    apiClient.post('/api/v1/students', data),
+
+  update: (id, data) =>
+    apiClient.put(`/api/v1/students/${id}`, data),
+
+  delete: (id) =>
+    apiClient.delete(`/api/v1/students/${id}`),
+
+  bulkDelete: (ids) =>
+    apiClient.post('/api/v1/students/bulk-delete', {
+      student_ids: ids
+    }),
+};
+
+// ================== CLASS ==================
+export const ClassService = {
+  getAll: (params = {}) =>
+    apiClient.get('/api/v1/classes', { params }),
+
+  getById: (id) =>
+    apiClient.get(`/api/v1/classes/${id}`),
+
+  create: (data) =>
+    apiClient.post('/api/v1/classes', data),
+
+  update: (id, data) =>
+    apiClient.put(`/api/v1/classes/${id}`, data),
+
+  delete: (id) =>
+    apiClient.delete(`/api/v1/classes/${id}`),
+};
+
+// ================== SUBJECT ==================
+export const SubjectService = {
+  getAll: (params = {}) =>
+    apiClient.get('/api/v1/subjects', { params }),
+
+  getById: (id) =>
+    apiClient.get(`/api/v1/subjects/${id}`),
+
+  create: (data) =>
+    apiClient.post('/api/v1/subjects', data),
+
+  update: (id, data) =>
+    apiClient.put(`/api/v1/subjects/${id}`, data),
+
+  delete: (id) =>
+    apiClient.delete(`/api/v1/subjects/${id}`),
+};
+
+// ================== TERM ==================
+export const AcademicTermService = {
+  getAll: (params = {}) =>
+    apiClient.get('/api/v1/terms', { params }),
+
+  getById: (id) =>
+    apiClient.get(`/api/v1/terms/${id}`),
+
+  create: (data) =>
+    apiClient.post('/api/v1/terms', data),
+
+  update: (id, data) =>
+    apiClient.put(`/api/v1/terms/${id}`, data),
+
+  delete: (id) =>
+    apiClient.delete(`/api/v1/terms/${id}`),
+};
+
+// ================== ROOM ==================
+export const RoomService = {
+  getAll: (params = {}) =>
+    apiClient.get('/api/v1/rooms', { params }),
+
+  getById: (id) =>
+    apiClient.get(`/api/v1/rooms/${id}`),
+
+  create: (data) =>
+    apiClient.post('/api/v1/rooms', data),
+
+  update: (id, data) =>
+    apiClient.put(`/api/v1/rooms/${id}`, data),
+
+  delete: (id) =>
+    apiClient.delete(`/api/v1/rooms/${id}`),
+};
+
+// ================== SCORE ==================
+export const ScoreService = {
+  getAll: (params = {}) =>
+    apiClient.get('/api/v1/scores', { params }),
+
+  getById: (id) =>
+    apiClient.get(`/api/v1/scores/${id}`),
+
+  create: (data) =>
+    apiClient.post('/api/v1/scores', data),
+
+  update: (id, data) =>
+    apiClient.put(`/api/v1/scores/${id}`, data),
+
+  delete: (id) =>
+    apiClient.delete(`/api/v1/scores/${id}`),
+};
