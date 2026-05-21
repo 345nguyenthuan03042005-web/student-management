@@ -7,15 +7,13 @@ const apiClient = axios.create({
   },
 });
 
-export default apiClient;
-
 // ================== INTERCEPTOR ==================
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('access_token');
 
-    console.log(" REQUEST:", config.url);
-    console.log(" TOKEN:", token);
+    console.log("REQUEST:", config.url);
+    console.log("TOKEN:", token);
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -28,11 +26,11 @@ apiClient.interceptors.request.use(
 
 apiClient.interceptors.response.use(
   (response) => {
-    console.log(" RESPONSE:", response.config.url);
+    console.log("RESPONSE:", response.config.url);
     return response;
   },
   (error) => {
-    console.log(" ERROR:", error.response?.status, error.response?.data);
+    console.log("ERROR:", error.response?.status, error.response?.data);
 
     if (error.response?.status === 401) {
       localStorage.removeItem('access_token');
@@ -44,11 +42,13 @@ apiClient.interceptors.response.use(
   }
 );
 
+// ================== EXPORT (ĐẶT CUỐI CÙNG) ==================
+export default apiClient;
+
 // ================== AUTH SERVICE ==================
 export const AuthService = {
-  login: (credentials) => {
-    return apiClient.post('/api/v1/auth/login', credentials);
-  },
+  login: (credentials) =>
+    apiClient.post('/api/v1/auth/login', credentials),
 
   logout: () => {
     localStorage.removeItem('access_token');
@@ -60,9 +60,8 @@ export const AuthService = {
     return user ? JSON.parse(user) : null;
   },
 
-  isAuthenticated: () => {
-    return !!localStorage.getItem('access_token');
-  }
+  isAuthenticated: () =>
+    !!localStorage.getItem('access_token')
 };
 
 // ================== STUDENT SERVICE ==================
