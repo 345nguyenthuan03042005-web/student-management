@@ -1,14 +1,13 @@
 import axios from 'axios';
 
-const API_BASE_URL = "https://student-management-api-t1sl.onrender.com";
-
-// ================== AXIOS CLIENT ==================
 const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: "https://student-management-api-t1sl.onrender.com",
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+export default apiClient;
 
 // ================== INTERCEPTOR ==================
 apiClient.interceptors.request.use(
