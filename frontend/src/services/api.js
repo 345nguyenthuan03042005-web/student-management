@@ -1,8 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = '/api';
+const API_BASE_URL = 'https://student-management-oss.onrender.com/api/v1';
 
-// Create Axios instance
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
