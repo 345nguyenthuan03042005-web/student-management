@@ -177,7 +177,7 @@ class ScoreService:
         if not enrollment:
             return None, "Enrollment not found"
 
-        # Grade is computed from score/max_score in the Vietnamese schema mapping.
+       
         score = ScoreCRUD.create_score(db, score_data)
         return score, None
 
