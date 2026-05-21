@@ -192,23 +192,30 @@ class AuthService:
                 login_data.password
             )
 
-            # 🔥 FIX NULL SAFETY
-            if user is None:
+            #  user không tồn tại
+            if not user:
                 return None, "Invalid username or password"
 
+            #  user inactive
             if not getattr(user, "is_active", False):
                 return None, "User account is inactive"
 
+            #  tạo token
             access_token = create_access_token(
-                data={"sub": user.username, "role": user.role},
+                data={
+                    "sub": user.username,
+                    "role": getattr(user, "role", "student")
+                },
                 expires_delta=timedelta(minutes=30),
             )
 
-            return Token(
+            token = Token(
                 access_token=access_token,
                 user=UserResponse.model_validate(user)
-            ), None
+            )
+
+            return token, None
 
         except Exception as e:
-            # 🔥 CHẶN TOÀN BỘ 500
-            return None, f"Login error: {str(e)}"
+            #  KHÔNG leak lỗi ra frontend
+            return None, "Internal server error"
