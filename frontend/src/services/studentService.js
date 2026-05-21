@@ -224,7 +224,7 @@ class ScoreService {
 
 class AuthService {
   static login(credentials) {
-    return apiClient.post('/auth/login', credentials);
+    return apiClient.post('/api/auth/login', credentials);
   }
 
   static logout() {
