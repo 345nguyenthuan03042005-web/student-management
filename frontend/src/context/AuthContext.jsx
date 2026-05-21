@@ -23,11 +23,10 @@ export const AuthProvider = ({ children }) => {
       const userData =
         response.data.user ||
         response.data.data ||
-        response.data.userData ||
-        null;
+        response.data.userData;
 
       if (!access_token) {
-        throw new Error('Backend did not return token');
+        throw new Error('No token returned from server');
       }
 
       localStorage.setItem('access_token', access_token);
@@ -39,7 +38,6 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       const errorMsg =
         err.response?.data?.detail ||
-        err.response?.data?.message ||
         err.message ||
         'Login failed';
 
@@ -59,17 +57,18 @@ export const AuthProvider = ({ children }) => {
     setError(null);
   }, []);
 
+  const value = {
+    user,
+    loading,
+    error,
+    login,
+    logout,
+
+    isAuthenticated: !!localStorage.getItem('access_token')
+  };
+
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        loading,
-        error,
-        login,
-        logout,
-        isAuthenticated: !!user
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
