@@ -184,33 +184,31 @@ class ScoreService:
 
 class AuthService:
     @staticmethod
-    def register_user(db: Session, user_data: UserCreate) -> Tuple[Optional[User], Optional[str]]:
-        if UserCRUD.get_user_by_username(db, user_data.username):
-            return None, "Username already taken"
-
-        if UserCRUD.get_user_by_email(db, user_data.email):
-            return None, "Email already registered"
-
-        user = UserCRUD.create_user(db, user_data)
-        return user, None
-
-    @staticmethod
     def login_user(db: Session, login_data: UserLogin) -> Tuple[Optional[Token], Optional[str]]:
-        user = UserCRUD.authenticate_user(db, login_data.username, login_data.password)
-        if not user:
-            return None, "Invalid username or password"
+        try:
+            user = UserCRUD.authenticate_user(
+                db,
+                login_data.username,
+                login_data.password
+            )
 
-        if not user.is_active:
-            return None, "User account is inactive"
+            # 🔥 FIX NULL SAFETY
+            if user is None:
+                return None, "Invalid username or password"
 
-        access_token = create_access_token(
-            data={"sub": user.username, "role": user.role},
-            expires_delta=timedelta(minutes=30),
-        )
-        user_response = UserResponse.model_validate(user)
-        token = Token(access_token=access_token, user=user_response)
-        return token, None
+            if not getattr(user, "is_active", False):
+                return None, "User account is inactive"
 
-    @staticmethod
-    def get_current_user(db: Session, username: str) -> Optional[User]:
-        return UserCRUD.get_user_by_username(db, username)
+            access_token = create_access_token(
+                data={"sub": user.username, "role": user.role},
+                expires_delta=timedelta(minutes=30),
+            )
+
+            return Token(
+                access_token=access_token,
+                user=UserResponse.model_validate(user)
+            ), None
+
+        except Exception as e:
+            # 🔥 CHẶN TOÀN BỘ 500
+            return None, f"Login error: {str(e)}"
