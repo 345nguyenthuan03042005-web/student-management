@@ -11,18 +11,38 @@ export const AuthProvider = ({ children }) => {
   const login = useCallback(async (username, password) => {
     setLoading(true);
     setError(null);
+
     try {
       const response = await AuthService.login({ username, password });
-      const { access_token, user: userData } = response.data;
-      
+
+      const access_token =
+        response.data.access_token ||
+        response.data.token ||
+        response.data.accessToken;
+
+      const userData =
+        response.data.user ||
+        response.data.data ||
+        response.data.userData;
+
+      if (!access_token) {
+        throw new Error('No token returned from server');
+      }
+
       localStorage.setItem('access_token', access_token);
       localStorage.setItem('user', JSON.stringify(userData));
-      
+
       setUser(userData);
+
       return { success: true };
     } catch (err) {
-      const errorMsg = err.response?.data?.detail || 'Login failed';
+      const errorMsg =
+        err.response?.data?.detail ||
+        err.message ||
+        'Login failed';
+
       setError(errorMsg);
+
       return { success: false, error: errorMsg };
     } finally {
       setLoading(false);
@@ -31,6 +51,8 @@ export const AuthProvider = ({ children }) => {
 
   const logout = useCallback(() => {
     AuthService.logout();
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('user');
     setUser(null);
     setError(null);
   }, []);
@@ -41,7 +63,8 @@ export const AuthProvider = ({ children }) => {
     error,
     login,
     logout,
-    isAuthenticated: !!user
+
+    isAuthenticated: !!localStorage.getItem('access_token')
   };
 
   return (
