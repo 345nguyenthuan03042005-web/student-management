@@ -184,7 +184,7 @@ class ScoreService:
 
 class AuthService:
     @staticmethod
-    def login_user(db: Session, login_data: UserLogin) -> Tuple[Optional[Token], Optional[str]]:
+    def login_user(db: Session, login_data: UserLogin):
         try:
             user = UserCRUD.authenticate_user(
                 db,
@@ -192,15 +192,15 @@ class AuthService:
                 login_data.password
             )
 
-            #  user không tồn tại
+            #  user not found
             if not user:
                 return None, "Invalid username or password"
 
-            #  user inactive
+            #  inactive user
             if not getattr(user, "is_active", False):
                 return None, "User account is inactive"
 
-            #  tạo token
+            #  create token
             access_token = create_access_token(
                 data={
                     "sub": user.username,
@@ -216,6 +216,5 @@ class AuthService:
 
             return token, None
 
-        except Exception as e:
-            #  KHÔNG leak lỗi ra frontend
+        except Exception:
             return None, "Internal server error"
