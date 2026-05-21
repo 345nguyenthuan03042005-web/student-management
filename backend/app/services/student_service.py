@@ -183,6 +183,18 @@ class ScoreService:
 
 
 class AuthService:
+
+    @staticmethod
+    def register_user(db: Session, user_data: UserCreate) -> Tuple[Optional[User], Optional[str]]:
+        if UserCRUD.get_user_by_username(db, user_data.username):
+            return None, "Username already taken"
+
+        if UserCRUD.get_user_by_email(db, user_data.email):
+            return None, "Email already registered"
+
+        user = UserCRUD.create_user(db, user_data)
+        return user, None
+
     @staticmethod
     def login_user(db: Session, login_data: UserLogin) -> Tuple[Optional[Token], Optional[str]]:
         try:
@@ -192,15 +204,12 @@ class AuthService:
                 login_data.password
             )
 
-            # user not found
             if not user:
                 return None, "Invalid username or password"
 
-            # inactive user
             if not getattr(user, "is_active", False):
                 return None, "User account is inactive"
 
-            # create token
             access_token = create_access_token(
                 data={
                     "sub": user.username,
@@ -218,3 +227,7 @@ class AuthService:
 
         except Exception:
             return None, "Internal server error"
+
+    @staticmethod
+    def get_current_user(db: Session, username: str) -> Optional[User]:
+        return UserCRUD.get_user_by_username(db, username)
