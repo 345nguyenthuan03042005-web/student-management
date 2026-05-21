@@ -177,7 +177,6 @@ class ScoreService:
         if not enrollment:
             return None, "Enrollment not found"
 
-       
         score = ScoreCRUD.create_score(db, score_data)
         return score, None
 
