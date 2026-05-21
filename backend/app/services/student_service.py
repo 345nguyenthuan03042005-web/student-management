@@ -184,7 +184,7 @@ class ScoreService:
 
 class AuthService:
     @staticmethod
-    def login_user(db: Session, login_data: UserLogin):
+    def login_user(db: Session, login_data: UserLogin) -> Tuple[Optional[Token], Optional[str]]:
         try:
             user = UserCRUD.authenticate_user(
                 db,
@@ -192,15 +192,15 @@ class AuthService:
                 login_data.password
             )
 
-            #  user not found
+            # user not found
             if not user:
                 return None, "Invalid username or password"
 
-            #  inactive user
+            # inactive user
             if not getattr(user, "is_active", False):
                 return None, "User account is inactive"
 
-            #  create token
+            # create token
             access_token = create_access_token(
                 data={
                     "sub": user.username,
