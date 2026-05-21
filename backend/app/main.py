@@ -5,21 +5,6 @@ from .core.config import settings
 from .db.base import Base
 from .db.database import engine
 
-from .api.routes import (
-    auth,
-    student,
-    class_route,
-    class_subject,
-    enrollment,
-    room,
-    teacher,
-    term,
-    schedule,
-    score,
-    attendance,
-    subject,
-)
-
 # =========================
 # APP INIT
 # =========================
@@ -36,7 +21,7 @@ app = FastAPI(
 Base.metadata.create_all(bind=engine)
 
 # =========================
-# CORS (ONLY ONCE)
+# CORS
 # =========================
 app.add_middleware(
     CORSMiddleware,
@@ -50,27 +35,46 @@ app.add_middleware(
 )
 
 # =========================
-# ROUTES
+# IMPORT ROUTERS (DIRECT - SAFE)
 # =========================
-app.include_router(auth.router, prefix="/api/v1")
-app.include_router(student.router, prefix="/api/v1")
-app.include_router(class_route.router, prefix="/api/v1")
-app.include_router(class_subject.router, prefix="/api/v1")
-app.include_router(enrollment.router, prefix="/api/v1")
-app.include_router(room.router, prefix="/api/v1")
-app.include_router(teacher.router, prefix="/api/v1")
-app.include_router(term.router, prefix="/api/v1")
-app.include_router(schedule.router, prefix="/api/v1")
-app.include_router(score.router, prefix="/api/v1")
-app.include_router(attendance.router, prefix="/api/v1")
-app.include_router(subject.router, prefix="/api/v1")
+from .api.routes.auth import router as auth_router
+from .api.routes.student import router as student_router
+from .api.routes.class_route import router as class_route_router
+from .api.routes.class_subject import router as class_subject_router
+from .api.routes.enrollment import router as enrollment_router
+from .api.routes.room import router as room_router
+from .api.routes.teacher import router as teacher_router
+from .api.routes.term import router as term_router
+from .api.routes.schedule import router as schedule_router
+from .api.routes.score import router as score_router
+from .api.routes.attendance import router as attendance_router
+from .api.routes.subject import router as subject_router
+
+# =========================
+# INCLUDE ROUTERS
+# =========================
+app.include_router(auth_router, prefix="/api/v1")
+app.include_router(student_router, prefix="/api/v1")
+app.include_router(class_route_router, prefix="/api/v1")
+app.include_router(class_subject_router, prefix="/api/v1")
+app.include_router(enrollment_router, prefix="/api/v1")
+app.include_router(room_router, prefix="/api/v1")
+app.include_router(teacher_router, prefix="/api/v1")
+app.include_router(term_router, prefix="/api/v1")
+app.include_router(schedule_router, prefix="/api/v1")
+app.include_router(score_router, prefix="/api/v1")
+app.include_router(attendance_router, prefix="/api/v1")
+app.include_router(subject_router, prefix="/api/v1")
 
 # =========================
 # ROOT
 # =========================
 @app.get("/")
 def root():
-    return {"message": "API running"}
+    return {
+        "message": "Student Management System API",
+        "status": "running"
+    }
 
 @app.get("/health")
 def health():
